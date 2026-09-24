@@ -1,0 +1,335 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: "Times New Roman", Times, Georgia, "Liberation Serif", serif;
+
+  --color-bg-deep: #f6f3ea;
+  --color-bg-mid: #efeada;
+  --color-bg-glow: #e7e0c9;
+  --color-viewer-bg: #0b1e3d;
+
+  --color-accent-a: #1d4ed8;
+  --color-accent-a-soft: #2563eb;
+  --color-accent-o: #0284c7;
+  --color-accent-o-soft: #0ea5e9;
+  --color-mint: #0f9d68;
+  --color-danger: #c02626;
+
+  --color-ink: #16213f;
+  --color-ink-dim: #43587a;
+  --color-ink-faint: #7791b2;
+
+  --color-glass: #faf6e9;
+  --color-glass-border: rgba(22, 33, 63, 0.18);
+
+  --radius-panel: 0.4rem;
+  --radius-control: 0.35rem;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-bg-deep);
+  background-image:
+    linear-gradient(rgba(22, 33, 63, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 33, 63, 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-attachment: fixed;
+  color: var(--color-ink);
+  min-height: 100dvh;
+}
+
+/* "Paper" panel: base for every card/surface in the student-facing app —
+   the same cream exam-booklet stock and ruled border as the landing hero's
+   paper cards, not a frosted glass tile. Sharp corners, a real offset
+   shadow (drawn, not blurred-ambient), and a printed rule instead of a
+   glossy highlight. */
+.glass {
+  background: linear-gradient(160deg, #faf6e9 0%, #efe7cf 100%);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-panel);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    3px 4px 0 rgba(22, 33, 63, 0.07),
+    10px 14px 26px -14px rgba(22, 33, 63, 0.28);
+}
+
+.glass-tilt {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.glass-tilt:active {
+  transform: scale(0.98) translateY(1px);
+}
+
+@media (hover: hover) {
+  .glass-tilt:hover {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.5) inset,
+      4px 6px 0 rgba(22, 33, 63, 0.09),
+      16px 22px 36px -16px rgba(22, 33, 63, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-tilt {
+    transition: none;
+  }
+}
+
+/* Pointer-tracked light sheen — the "light hitting glass" cue on hover. */
+.glass-glare {
+  position: relative;
+  --glare-x: 50%;
+  --glare-y: 50%;
+  --glare-o: 0;
+}
+
+.glass-glare::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    260px circle at var(--glare-x) var(--glare-y),
+    rgba(255, 255, 255, 0.45),
+    transparent 60%
+  );
+  opacity: var(--glare-o);
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+
+/* Icon badge: a bordered square with a line-art mark, like a rubber-stamp
+   or a drafting symbol on a technical drawing — not a glossy gradient
+   app-icon squircle. */
+.icon-badge {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.3rem;
+  border: 1.5px solid currentColor;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.glass-mint {
+  border-color: rgba(15, 157, 104, 0.35);
+}
+
+/* Apple-style tinted glass button: a saturated color seen *through* frosted
+   glass (blur + top highlight + inset light line), not a flat fill. Every
+   variant sets --btn-tint (the color the glass is tinted with) and this
+   class does the actual glass construction, so the effect stays identical
+   across colors. */
+.btn-glass {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--btn-tint) 92%, white 8%) 0%,
+    color-mix(in srgb, var(--btn-tint) 78%, black 6%) 100%
+  );
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid color-mix(in srgb, var(--btn-tint) 40%, white 60%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.45) inset,
+    0 1px 1px rgba(255, 255, 255, 0.5) inset,
+    0 10px 22px -6px color-mix(in srgb, var(--btn-tint) 55%, transparent),
+    0 2px 6px color-mix(in srgb, var(--btn-tint) 35%, transparent);
+  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+}
+
+.btn-glass::before {
+  /* Glossy top sheen, like light rolling off a curved glass cap. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, transparent 42%);
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (hover: hover) {
+  .btn-glass:hover {
+    filter: brightness(1.04);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.5) inset,
+      0 1px 1px rgba(255, 255, 255, 0.55) inset,
+      0 14px 28px -6px color-mix(in srgb, var(--btn-tint) 60%, transparent),
+      0 3px 8px color-mix(in srgb, var(--btn-tint) 40%, transparent);
+  }
+}
+
+.btn-glass:active {
+  transform: scale(0.965) translateY(1px);
+  filter: brightness(0.97);
+}
+
+.btn-glass.btn-ghost {
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.85), rgba(223, 238, 255, 0.5));
+  border-color: var(--color-glass-border);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 6px 16px rgba(29, 78, 216, 0.1);
+  color: var(--color-ink);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .btn-glass {
+    backdrop-filter: none;
+    background: var(--btn-tint);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-glass {
+    transition: none;
+  }
+}
+
+::selection {
+  background: var(--color-accent-a);
+  color: white;
+}
+
+/* ---------------------------------------------------------------------
+   Landing hero: a fanned, receding stack of exam-paper cards in real 3D
+   space (perspective + translateZ, not a flat drop-shadow trick), styled
+   after the actual cover sheet of a GCE paper — subject code, level, board
+   name. Deliberately the one bold moment on the page; everything below it
+   goes back to the plain white/blue system used through the rest of the app.
+   ------------------------------------------------------------------- */
+.landing-hero {
+  background:
+    radial-gradient(120% 90% at 78% 8%, #1c3f8f 0%, transparent 55%),
+    radial-gradient(90% 70% at 15% 100%, #0d2660 0%, transparent 60%),
+    linear-gradient(175deg, #050b1a 0%, #0a1836 60%, #0d2154 100%);
+  color: #eaf1ff;
+}
+
+.paper-scene-wrap {
+  perspective: 1500px;
+  perspective-origin: 50% 35%;
+  touch-action: pan-y;
+}
+
+.paper-scene {
+  --scene-rx: 6deg;
+  --scene-ry: -10deg;
+  position: relative;
+  width: 100%;
+  height: 340px;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--scene-rx)) rotateY(var(--scene-ry));
+  transition: transform 350ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.paper-card {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 208px;
+  height: 288px;
+  border-radius: 4px;
+  background: linear-gradient(160deg, #faf6e9 0%, #ece4cd 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 calc(18px + var(--i) * 4px) calc(40px + var(--i) * 6px) -14px rgba(2, 6, 20, 0.65);
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #16213f;
+  filter: brightness(calc(1 - var(--i) * 0.045)) saturate(calc(1 - var(--i) * 0.06));
+  transform:
+    translateX(calc((var(--i) - (var(--n) - 1) / 2) * 36px))
+    translateZ(calc(var(--i) * -30px))
+    rotateY(calc((var(--i) - (var(--n) - 1) / 2) * -7deg));
+  animation: paper-card-in 850ms cubic-bezier(0.16, 0.8, 0.24, 1) both;
+  animation-delay: calc(var(--i) * 85ms + 150ms);
+}
+
+@keyframes paper-card-in {
+  from {
+    opacity: 0;
+    transform:
+      translateX(calc((var(--i) - (var(--n) - 1) / 2) * 36px))
+      translateZ(-520px)
+      rotateY(0deg)
+      scale(0.86);
+  }
+  to {
+    opacity: 1;
+    transform:
+      translateX(calc((var(--i) - (var(--n) - 1) / 2) * 36px))
+      translateZ(calc(var(--i) * -30px))
+      rotateY(calc((var(--i) - (var(--n) - 1) / 2) * -7deg))
+      scale(1);
+  }
+}
+
+.paper-card-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #5b6b93;
+  border-bottom: 1px solid rgba(22, 33, 63, 0.18);
+  padding-bottom: 8px;
+}
+
+.paper-card-subject {
+  margin-top: auto;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.paper-card-code {
+  font-size: 12px;
+  color: #6b7aa0;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paper-card {
+    animation: none;
+    opacity: 1;
+  }
+  .paper-scene {
+    transition: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .paper-scene {
+    height: 260px;
+  }
+  .paper-card {
+    width: 168px;
+    height: 232px;
+    padding: 15px 14px;
+  }
+  .paper-card-subject {
+    font-size: 16px;
+  }
+}
+
+/* Ghost button on the dark hero needs a light-on-dark treatment instead of
+   the app-wide light-glass ghost style. */
+.btn-ghost-dark.btn-ghost {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 6px 16px rgba(2, 6, 20, 0.35);
+}
