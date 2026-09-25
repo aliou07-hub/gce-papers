@@ -39,11 +39,15 @@ export async function POST(request: Request) {
 
   const supabase = supabaseAdmin();
 
-  const { data: existing } = await supabase
+  const { data: existing, error: lookupError } = await supabase
     .from("users")
     .select("id")
     .eq("phone_number", phone)
     .maybeSingle();
+
+  if (lookupError) {
+    console.error("[signup] Supabase lookup failed:", lookupError.message, lookupError);
+  }
 
   if (existing) {
     return NextResponse.json(
@@ -61,6 +65,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error || !user) {
+    console.error("[signup] Supabase insert failed:", error?.message, error);
     return NextResponse.json({ error: "Could not create account" }, { status: 500 });
   }
 
