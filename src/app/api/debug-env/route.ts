@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-/** TEMPORARY diagnostic endpoint — reveals no secret values, only shapes and a live connectivity test. Remove after use. */
+/** TEMPORARY diagnostic endpoint — reveals zero characters of any secret, only presence/length/whitespace flags and a live connectivity test's status code and timing. Remove after use. */
 export async function GET() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? null;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? null;
@@ -13,10 +13,9 @@ export async function GET() {
     return {
       present: true,
       length: v.length,
-      startsWith: v.slice(0, 12),
-      endsWith: v.slice(-6),
-      hasWhitespace: /\s/.test(v),
+      hasLeadingOrTrailingWhitespace: v !== v.trim(),
       hasQuotes: v.includes('"') || v.includes("'"),
+      hasNewline: v.includes("\n") || v.includes("\r"),
     };
   }
 
@@ -24,12 +23,11 @@ export async function GET() {
   const startedAt = Date.now();
   try {
     if (url && service) {
-      const res = await fetch(`${url}/rest/v1/admins?select=username&limit=1`, {
+      const res = await fetch(`${url}/rest/v1/admins?select=id&limit=1`, {
         headers: { apikey: service, Authorization: `Bearer ${service}` },
         signal: AbortSignal.timeout(8000),
       });
-      const text = await res.text();
-      liveTest = { status: res.status, ms: Date.now() - startedAt, body: text.slice(0, 300) };
+      liveTest = { status: res.status, ok: res.ok, ms: Date.now() - startedAt };
     } else {
       liveTest = { skipped: "url or service key missing" };
     }
