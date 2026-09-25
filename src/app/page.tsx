@@ -7,9 +7,14 @@ import { Button } from "@/components/ui/Button";
 import { GlassPanel } from "@/components/ui/GlassPanel";
 import { HeroPaperStack } from "@/components/app/HeroPaperStack";
 
+export const dynamic = "force-dynamic";
+
 async function getCatalogStats() {
   const supabase = supabaseAdmin();
-  const { data } = await supabase.from("documents").select("subject, year");
+  const { data, error } = await supabase.from("documents").select("subject, year");
+  if (error) {
+    console.error("[homepage] Supabase query failed:", error.message, error);
+  }
   const rows = data ?? [];
   const subjects = new Set(rows.map((r) => String(r.subject).split(" — ")[0]));
   const years = rows.map((r) => r.year as number);

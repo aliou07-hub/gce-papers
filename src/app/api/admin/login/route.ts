@@ -31,11 +31,15 @@ export async function POST(request: Request) {
   }
 
   const supabase = supabaseAdmin();
-  const { data: admin } = await supabase
+  const { data: admin, error: dbError } = await supabase
     .from("admins")
     .select("*")
     .eq("username", parsed.data.username)
     .maybeSingle<DbAdmin>();
+
+  if (dbError) {
+    console.error("[admin login] Supabase query failed:", dbError.message, dbError);
+  }
 
   if (!admin || !(await verifyPassword(parsed.data.password, admin.password_hash))) {
     return NextResponse.json({ error: "Incorrect username or password" }, { status: 401 });
