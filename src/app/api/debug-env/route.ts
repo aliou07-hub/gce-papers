@@ -28,10 +28,32 @@ export async function GET() {
     }
   }
 
+  // Check whether dropping the first N characters of `actual` makes it match.
+  let matchesIfShifted = -1;
+  for (let shift = 1; shift <= 3; shift++) {
+    const shifted = actual.slice(shift);
+    let ok = shifted.length === EXPECTED_PREFIX_HASHES.length;
+    if (ok) {
+      for (let i = 0; i < EXPECTED_PREFIX_HASHES.length; i++) {
+        if (prefixHash(shifted, i + 1) !== EXPECTED_PREFIX_HASHES[i]) {
+          ok = false;
+          break;
+        }
+      }
+    }
+    if (ok) {
+      matchesIfShifted = shift;
+      break;
+    }
+  }
+
   return NextResponse.json({
     actualLength: actual.length,
     expectedLength: EXPECTED_PREFIX_HASHES.length,
     matchesFully: firstDiffIndex === -1 && actual.length === EXPECTED_PREFIX_HASHES.length,
     firstDiffIndex,
+    matchesIfShifted,
+    firstCharCode: actual.length > 0 ? actual.charCodeAt(0) : null,
+    secondCharCode: actual.length > 1 ? actual.charCodeAt(1) : null,
   });
 }
