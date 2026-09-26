@@ -39,50 +39,67 @@ export function PdfViewer({ documentId }: { documentId: string }) {
   useEffect(() => {
     let cancelled = false;
 
+    async function attemptLoad() {
+      const res = await fetch(`/api/viewer/${documentId}`, { cache: "no-store" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403 && data.error === "Purchase required to view this document") {
+          setStatus("locked");
+          return "locked" as const;
+        }
+        throw new Error(data.error ?? "Could not open this document");
+      }
+
+      const docMeta: DocMeta = {
+        subject: decodeURIComponent(res.headers.get("X-Kaolo-Subject") ?? ""),
+        level: res.headers.get("X-Kaolo-Level") ?? "",
+        year: res.headers.get("X-Kaolo-Year") ?? "",
+        type: res.headers.get("X-Kaolo-Type") ?? "",
+        isPreview: res.headers.get("X-Kaolo-Preview") === "true",
+        previewPages: Number(res.headers.get("X-Kaolo-Preview-Pages") ?? 0),
+        totalPages: Number(res.headers.get("X-Kaolo-Total-Pages") ?? 0),
+      };
+
+      const bytes = await res.arrayBuffer();
+      const pdfjsLib = await import("pdfjs-dist");
+      pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+        "pdfjs-dist/build/pdf.worker.min.mjs",
+        import.meta.url
+      ).toString();
+
+      const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+      if (cancelled) return "cancelled" as const;
+
+      pdfRef.current = pdf;
+      setNumPages(pdf.numPages);
+      setMeta(docMeta);
+
+      // Fit the first page to the screen width instead of rendering at
+      // native PDF scale (which is wider than a phone screen).
+      const firstPage = await pdf.getPage(1);
+      const nativeWidth = firstPage.getViewport({ scale: 1 }).width;
+      const available = (containerRef.current?.clientWidth ?? window.innerWidth) - 32;
+      setScale(Math.max(0.4, Math.min(2.4, available / nativeWidth)));
+
+      setStatus("ready");
+      return "ready" as const;
+    }
+
+    // One silent retry before showing an error — covers a flaky mobile
+    // connection dropping the first attempt, or the document being
+    // re-uploaded (admin edit) at the exact moment it was requested.
     async function load() {
       try {
-        const res = await fetch(`/api/viewer/${documentId}`);
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          if (res.status === 403 && data.error === "Purchase required to view this document") {
-            setStatus("locked");
-            return;
-          }
-          throw new Error(data.error ?? "Could not open this document");
-        }
-
-        const docMeta: DocMeta = {
-          subject: decodeURIComponent(res.headers.get("X-Kaolo-Subject") ?? ""),
-          level: res.headers.get("X-Kaolo-Level") ?? "",
-          year: res.headers.get("X-Kaolo-Year") ?? "",
-          type: res.headers.get("X-Kaolo-Type") ?? "",
-          isPreview: res.headers.get("X-Kaolo-Preview") === "true",
-          previewPages: Number(res.headers.get("X-Kaolo-Preview-Pages") ?? 0),
-          totalPages: Number(res.headers.get("X-Kaolo-Total-Pages") ?? 0),
-        };
-
-        const bytes = await res.arrayBuffer();
-        const pdfjsLib = await import("pdfjs-dist");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-          "pdfjs-dist/build/pdf.worker.min.mjs",
-          import.meta.url
-        ).toString();
-
-        const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
-        if (cancelled) return;
-
-        pdfRef.current = pdf;
-        setNumPages(pdf.numPages);
-        setMeta(docMeta);
-
-        // Fit the first page to the screen width instead of rendering at
-        // native PDF scale (which is wider than a phone screen).
-        const firstPage = await pdf.getPage(1);
-        const nativeWidth = firstPage.getViewport({ scale: 1 }).width;
-        const available = (containerRef.current?.clientWidth ?? window.innerWidth) - 32;
-        setScale(Math.max(0.4, Math.min(2.4, available / nativeWidth)));
-
-        setStatus("ready");
+        const outcome = await attemptLoad();
+        if (outcome === "ready" || outcome === "locked" || outcome === "cancelled") return;
+      } catch {
+        // fall through to retry
+      }
+      if (cancelled) return;
+      await new Promise((resolve) => setTimeout(resolve, 900));
+      if (cancelled) return;
+      try {
+        await attemptLoad();
       } catch (e) {
         if (!cancelled) {
           setError(e instanceof Error ? e.message : "Could not open this document");
@@ -193,7 +210,16 @@ export function PdfViewer({ documentId }: { documentId: string }) {
           <p className="mt-10 text-center text-sm text-white/60">Loading document…</p>
         )}
         {status === "error" && (
-          <p className="mt-10 text-center text-sm text-danger">{error}</p>
+          <div className="mx-auto mt-14 w-full max-w-xs px-4 text-center">
+            <p className="text-sm text-danger">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="btn-glass mt-5 w-full rounded-control px-4 py-2.5 text-sm font-semibold text-white"
+              style={{ "--btn-tint": "var(--color-accent-a)" } as React.CSSProperties}
+            >
+              Try again
+            </button>
+          </div>
         )}
         {status === "locked" && (
           <div className="mx-auto mt-14 w-full max-w-xs px-4 text-center">

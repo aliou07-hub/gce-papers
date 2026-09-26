@@ -11,7 +11,7 @@ const outPath = process.argv[3];
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOGO_PATH = path.join(__dirname, "..", "public", "branding", "icon.png");
 const BRAND_NAME = "GCE Papers";
-const BRAND_SITE = "gcpapers.site";
+const BRAND_SITE = "gcepapers.site";
 const BRAND_PHONE = "+237 676 20 34 54";
 
 const doc = await PDFDocument.create();
