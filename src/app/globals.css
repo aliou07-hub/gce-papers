@@ -161,6 +161,32 @@ body {
   }
 }
 
+/* Gentle attention-getting pulse for the "buy to unlock" call to action —
+   just enough movement that a first-time student notices it without it
+   feeling like an aggressive ad. */
+.animate-pulse-glow {
+  animation: pulse-glow 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.45) inset,
+      0 0 0 0 color-mix(in srgb, var(--btn-tint) 55%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.45) inset,
+      0 0 0 8px color-mix(in srgb, var(--btn-tint) 0%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-glow {
+    animation: none;
+  }
+}
+
 /* Pointer-tracked light sheen — the "light hitting glass" cue on hover. */
 .glass-glare {
   position: relative;

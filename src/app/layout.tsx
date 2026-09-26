@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { FloatingWhatsApp } from "@/components/app/FloatingWhatsApp";
+import { SiteFooter } from "@/components/app/SiteFooter";
 
 export const metadata: Metadata = {
   title: "GCE Papers — Cameroon GCE Past Papers",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <span className="orb" />
         </div>
         {children}
+        <SiteFooter />
         <FloatingWhatsApp />
       </body>
     </html>

@@ -6,7 +6,6 @@ import { GlassPanel } from "@/components/ui/GlassPanel";
 import { Button } from "@/components/ui/Button";
 import { getSubjectOfferings, getBundleQuote } from "@/lib/subjects";
 import { joinPaperLabel } from "@/lib/paperLabel";
-import { questionsOnlyPrice, questionsAndSchemePrice, schemeOnlyPrice } from "@/lib/pricing";
 import { getStudentSession } from "@/lib/auth/session";
 import { userCanAccessDocument } from "@/lib/access";
 import type { GceLevel } from "@/lib/types";
@@ -95,8 +94,9 @@ export default async function SubjectsPage({
                 <div className="mt-3 flex flex-col gap-2.5">
                   {offering.papers.map((paper) => {
                     const rawSubject = joinPaperLabel(offering.subject, paper.label);
-                    const questionsPrice = questionsOnlyPrice(level, paper.label);
-                    const bothPrice = questionsAndSchemePrice(level, paper.label);
+                    const questionsPrice = paper.questions?.price_fcfa ?? 0;
+                    const schemePrice = paper.markingScheme?.price_fcfa ?? 0;
+                    const bothPrice = questionsPrice + schemePrice;
                     return (
                       <div key={paper.label ?? ""}>
                         {paper.label && (
@@ -159,7 +159,7 @@ export default async function SubjectsPage({
                                       variant={level === "O_LEVEL" ? "o-level" : "a-level"}
                                       className="w-full text-[13px]"
                                     >
-                                      Marking scheme · {schemeOnlyPrice(level)} FCFA
+                                      Marking scheme · {schemePrice} FCFA
                                     </Button>
                                   </Link>
                                 </>

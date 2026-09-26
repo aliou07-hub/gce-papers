@@ -1,7 +1,7 @@
 import "server-only";
 import { supabaseAdmin } from "./supabase/server";
 import type { DbDocument, GceLevel, SubjectOffering } from "./types";
-import { bundlePrice, questionsAndSchemePrice } from "./pricing";
+import { bundlePrice } from "./pricing";
 import { splitPaperLabel } from "./paperLabel";
 
 export { splitPaperLabel, joinPaperLabel } from "./paperLabel";
@@ -55,8 +55,10 @@ export async function getBundleQuote(level: GceLevel, year: number) {
   const eligiblePapers = offerings.flatMap((o) =>
     o.papers.filter((p) => p.questions && p.markingScheme)
   );
+  // Real per-document prices, so the bundle total always matches what each
+  // paper actually costs individually (including any admin price edits).
   const fullPrice = eligiblePapers.reduce(
-    (sum, p) => sum + questionsAndSchemePrice(level, p.label),
+    (sum, p) => sum + p.questions!.price_fcfa + p.markingScheme!.price_fcfa,
     0
   );
   return {

@@ -110,7 +110,7 @@ export function CheckoutFlow() {
                 className={`rounded-control border px-4 py-2.5 text-sm font-medium transition-colors ${
                   operator === op
                     ? "border-accent-a bg-accent-a/20 text-ink"
-                    : "border-accent-a/15 bg-white/60 text-ink-dim"
+                    : "border-white/12 bg-white/5 text-ink-dim"
                 }`}
               >
                 {op === "MTN" ? "MTN MoMo" : "Orange Money"}

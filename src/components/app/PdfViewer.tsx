@@ -173,15 +173,17 @@ export function PdfViewer({ documentId }: { documentId: string }) {
       </div>
 
       {meta?.isPreview && (
-        <div className="flex flex-wrap items-center justify-between gap-2 bg-accent-a-soft/15 px-4 py-2.5">
-          <p className="text-xs text-white/80">
-            Free preview — {meta.previewPages} of {meta.totalPages} pages
+        <div className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-accent-a/40 bg-gradient-to-r from-accent-a/25 via-accent-a/15 to-accent-a/25 px-4 py-2.5 shadow-[0_4px_20px_-4px_var(--color-accent-a)]">
+          <p className="text-xs font-medium text-white">
+            🔓 Free preview — page {Math.min(pageNum, meta.previewPages)} of{" "}
+            {meta.previewPages} shown ({meta.totalPages} pages total)
           </p>
           <Link
             href={buyHref}
-            className="rounded-control bg-accent-a-soft px-3 py-1.5 text-xs font-semibold text-white"
+            className="btn-glass animate-pulse-glow shrink-0 rounded-control px-3.5 py-1.5 text-xs font-bold text-white"
+            style={{ "--btn-tint": "var(--color-accent-a)" } as React.CSSProperties}
           >
-            Buy to unlock all pages
+            🔓 Buy to unlock all pages
           </Link>
         </div>
       )}
@@ -221,23 +223,25 @@ export function PdfViewer({ documentId }: { documentId: string }) {
       </div>
 
       {status === "ready" && numPages > 1 && (
-        <div className="flex items-center justify-center gap-4 border-t border-white/10 px-4 py-3">
+        <div className="flex items-center justify-center gap-3 border-t border-white/10 px-4 py-3">
           <button
             onClick={() => setPageNum((p) => Math.max(1, p - 1))}
             disabled={pageNum <= 1}
-            className="rounded-control bg-white/10 px-4 py-2 text-sm text-white disabled:opacity-40"
+            className="btn-glass flex items-center gap-1.5 rounded-control px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-30"
+            style={{ "--btn-tint": "var(--color-accent-o)" } as React.CSSProperties}
           >
-            Previous
+            ← Previous
           </button>
-          <span className="text-sm text-white/60">
-            Page {pageNum} of {numPages}
+          <span className="rounded-full bg-accent-a px-4 py-1.5 text-sm font-bold text-white shadow-[0_4px_14px_-2px_var(--color-accent-a)]">
+            Page {pageNum} / {numPages}
           </span>
           <button
             onClick={() => setPageNum((p) => Math.min(numPages, p + 1))}
             disabled={pageNum >= numPages}
-            className="rounded-control bg-white/10 px-4 py-2 text-sm text-white disabled:opacity-40"
+            className="btn-glass flex items-center gap-1.5 rounded-control px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-30"
+            style={{ "--btn-tint": "var(--color-accent-o)" } as React.CSSProperties}
           >
-            Next
+            Next →
           </button>
         </div>
       )}

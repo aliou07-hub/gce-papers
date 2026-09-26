@@ -3,7 +3,6 @@ import { z } from "zod";
 import { supabaseAdmin } from "./supabase/server";
 import { getBundleQuote } from "./subjects";
 import { splitPaperLabel } from "./paperLabel";
-import { questionsAndSchemePrice, questionsOnlyPrice, schemeOnlyPrice } from "./pricing";
 import type { DbDocument, GceLevel } from "./types";
 
 export const checkoutQuerySchema = z.discriminatedUnion("type", [
@@ -61,7 +60,7 @@ export async function resolveCheckoutQuote(query: CheckoutQuery): Promise<Checko
     if (!scheme) return null;
     return {
       label: `${subjectLabel} — ${LEVEL_LABEL[query.level]} ${query.year} (Marking Scheme)`,
-      amountFcfa: schemeOnlyPrice(query.level),
+      amountFcfa: scheme.price_fcfa,
       documentId: scheme.id,
     };
   }
@@ -69,10 +68,11 @@ export async function resolveCheckoutQuote(query: CheckoutQuery): Promise<Checko
   if (!questions) return null;
   if (query.option === "both" && !scheme) return null;
 
+  // Real per-document prices (set by the admin), never re-derived from the
+  // flat pricing formula — what's shown to the student is exactly what they
+  // pay, even after a manual price edit in the admin dashboard.
   const amountFcfa =
-    query.option === "both"
-      ? questionsAndSchemePrice(query.level, paper)
-      : questionsOnlyPrice(query.level, paper);
+    query.option === "both" ? questions.price_fcfa + (scheme?.price_fcfa ?? 0) : questions.price_fcfa;
 
   return {
     label: `${subjectLabel} — ${LEVEL_LABEL[query.level]} ${query.year} (${
