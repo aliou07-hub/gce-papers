@@ -6,7 +6,7 @@ const STEPS = ["Level", "Year", "Subjects"] as const;
 export function ProgressTrail({ current }: { current: 0 | 1 | 2 }) {
   return (
     <div
-      className="flex border border-ink/15 text-[13px]"
+      className="glass flex text-[13px]"
       style={{ borderRadius: "var(--radius-control)" }}
       aria-label="Navigation progress"
     >
@@ -16,8 +16,12 @@ export function ProgressTrail({ current }: { current: 0 | 1 | 2 }) {
         return (
           <div
             key={step}
-            className={`flex-1 px-3 py-2 text-center ${i > 0 ? "border-l border-ink/15" : ""} ${
-              active ? "bg-ink text-[#f6f3ea] font-semibold" : done ? "text-ink" : "text-ink-faint"
+            className={`flex-1 px-3 py-2.5 text-center ${i > 0 ? "border-l border-white/10" : ""} ${
+              active
+                ? "rounded-[inherit] bg-accent-a text-white font-semibold shadow-[0_4px_16px_-4px_var(--color-accent-a)]"
+                : done
+                  ? "text-ink"
+                  : "text-ink-faint"
             }`}
           >
             <span className="tabular-nums">{i + 1}.</span> {step}

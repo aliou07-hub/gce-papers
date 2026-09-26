@@ -15,7 +15,7 @@ export function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between border-b border-accent-a/10 bg-bg-deep/70 px-5 py-3.5 backdrop-blur-xl">
+    <header className="sticky top-4 z-10 mx-auto flex w-[calc(100%-2rem)] max-w-2xl items-center justify-between rounded-full border border-white/14 bg-white/8 px-5 py-3 shadow-[0_1px_0_rgba(255,255,255,0.16)_inset,0_20px_50px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl backdrop-saturate-150">
       <Link href="/level" className="flex items-center gap-2 text-[15px] font-bold text-ink">
         <Image src="/branding/icon.png" alt="" width={24} height={24} className="h-6 w-6" />
         GCE Papers
