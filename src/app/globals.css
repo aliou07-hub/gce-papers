@@ -4,17 +4,17 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui,
     sans-serif;
 
-  --color-bg-deep: #05070d;
-  --color-bg-mid: #0a0f1c;
-  --color-bg-glow: #0d1730;
-  --color-viewer-bg: #05070d;
+  --color-bg-deep: #0d0906;
+  --color-bg-mid: #170f0a;
+  --color-bg-glow: #2b1608;
+  --color-viewer-bg: #0d0906;
 
-  --color-accent-a: #4f8cff;
-  --color-accent-a-soft: #7db2ff;
-  --color-accent-o: #22d3ee;
-  --color-accent-o-soft: #67e8f9;
-  --color-mint: #34e0a1;
-  --color-danger: #ff6b6b;
+  --color-accent-a: #f2a13b;
+  --color-accent-a-soft: #f7bd6e;
+  --color-accent-o: #1ed760;
+  --color-accent-o-soft: #5eeb8f;
+  --color-mint: #1ed760;
+  --color-danger: #ff6b5e;
 
   --color-ink: #f3f6ff;
   --color-ink-dim: #aab4d4;
@@ -48,7 +48,7 @@ body {
   inset: 0;
   z-index: -1;
   overflow: hidden;
-  background: radial-gradient(120% 100% at 50% -10%, #0d1730 0%, #05070d 55%, #020308 100%);
+  background: radial-gradient(120% 100% at 50% -10%, #2b1608 0%, #0d0906 55%, #060402 100%);
 }
 
 .ambient-field::before,
@@ -67,7 +67,7 @@ body {
   height: 46vw;
   top: -12vw;
   left: -8vw;
-  background: radial-gradient(circle, #3a5bff 0%, transparent 70%);
+  background: radial-gradient(circle, #ff8a3d 0%, transparent 70%);
   animation: drift-a 26s ease-in-out infinite;
 }
 
@@ -76,7 +76,7 @@ body {
   height: 50vw;
   bottom: -18vw;
   right: -12vw;
-  background: radial-gradient(circle, #7c3aed 0%, transparent 70%);
+  background: radial-gradient(circle, #e2432a 0%, transparent 70%);
   animation: drift-b 32s ease-in-out infinite;
 }
 
@@ -85,7 +85,7 @@ body {
   height: 34vw;
   top: 30%;
   left: 55%;
-  background: radial-gradient(circle, #14c8b0 0%, transparent 70%);
+  background: radial-gradient(circle, #f2c94c 0%, transparent 70%);
   opacity: 0.35;
   animation: drift-c 38s ease-in-out infinite;
 }
