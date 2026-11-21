@@ -116,7 +116,7 @@ export default async function SubjectsPage({
                               <>
                                 <Link href={`/viewer/${paper.questions.id}`}>
                                   <Button variant="ghost" className="text-[13px]">
-                                    Preview
+                                    Free preview
                                   </Button>
                                 </Link>
                                 <Link
@@ -126,7 +126,7 @@ export default async function SubjectsPage({
                                   className="flex-1"
                                 >
                                   <Button variant="ghost" className="w-full text-[13px]">
-                                    Questions · {questionsPrice} FCFA
+                                    Buy questions · {questionsPrice} FCFA
                                   </Button>
                                 </Link>
                               </>
@@ -146,7 +146,7 @@ export default async function SubjectsPage({
                                 <>
                                   <Link href={`/viewer/${paper.markingScheme.id}`}>
                                     <Button variant="ghost" className="text-[13px]">
-                                      Preview
+                                      Free preview
                                     </Button>
                                   </Link>
                                   <Link
@@ -191,7 +191,7 @@ export default async function SubjectsPage({
                                     variant={level === "O_LEVEL" ? "o-level" : "a-level"}
                                     className="w-full text-[13px]"
                                   >
-                                    + Marking · {bothPrice} FCFA
+                                    Questions + marking scheme · {bothPrice} FCFA
                                   </Button>
                                 </Link>
                               )}

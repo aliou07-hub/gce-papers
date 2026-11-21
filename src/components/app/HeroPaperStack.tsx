@@ -2,15 +2,14 @@
 
 import { useRef } from "react";
 
-/** Real subject codes, pulled from the actual papers in the catalog — this
- * is the front door, so what it shows should be true, not placeholder. */
+/** First pages (cover sheets) of real question papers from the catalogue —
+ * the cover only shows subject, year and instructions, never questions. */
 const CARDS = [
-  { code: "0560", subject: "History", level: "O Level" },
-  { code: "0775", subject: "Further Mathematics", level: "A Level" },
-  { code: "0515", subject: "Chemistry", level: "O Level" },
-  { code: "0796", subject: "ICT", level: "A Level" },
-  { code: "0525", subject: "Economics", level: "A Level" },
-  { code: "0570", subject: "Mathematics", level: "O Level" },
+  { src: "/previews/al-cs.webp", alt: "A Level Computer Science 2025 — cover page" },
+  { src: "/previews/ol-hist.webp", alt: "O Level History 2025 — cover page" },
+  { src: "/previews/al-econ.webp", alt: "A Level Economics 2025 — cover page" },
+  { src: "/previews/ol-bio.webp", alt: "O Level Biology 2025 — cover page" },
+  { src: "/previews/al-phys.webp", alt: "A Level Physics 2025 — cover page" },
 ];
 
 export function HeroPaperStack() {
@@ -39,16 +38,12 @@ export function HeroPaperStack() {
       <div className="paper-scene" ref={sceneRef}>
         {CARDS.map((c, i) => (
           <div
-            key={c.code}
+            key={c.src}
             className="paper-card"
             style={{ "--i": i, "--n": CARDS.length } as React.CSSProperties}
           >
-            <div className="paper-card-head">
-              <span>G.C.E. Board</span>
-              <span>{c.level}</span>
-            </div>
-            <p className="paper-card-subject">{c.subject}</p>
-            <span className="paper-card-code">{c.code}</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={c.src} alt={c.alt} draggable={false} loading={i < 2 ? "eager" : "lazy"} />
           </div>
         ))}
       </div>

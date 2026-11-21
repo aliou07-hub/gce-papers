@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppHeader } from "@/components/app/AppHeader";
+import { AutoRefresh } from "@/components/app/AutoRefresh";
 import { GlassPanel } from "@/components/ui/GlassPanel";
 import { Button } from "@/components/ui/Button";
 import { getStudentSession } from "@/lib/auth/session";
@@ -8,6 +9,10 @@ import { splitPaperLabel } from "@/lib/paperLabel";
 import type { DbDocument, DbPurchase, GceLevel } from "@/lib/types";
 
 export const metadata = { title: "My Purchases — GCE Papers" };
+
+function minutesAgoIso(minutes: number) {
+  return new Date(Date.now() - minutes * 60 * 1000).toISOString();
+}
 
 const LEVEL_LABEL: Record<GceLevel, string> = { O_LEVEL: "O Level", A_LEVEL: "A Level" };
 
@@ -35,6 +40,17 @@ export default async function PurchasesPage() {
 
   const list = (purchases as DbPurchase[] | null) ?? [];
 
+  // A payment made in the last 15 minutes that KPAY hasn't confirmed yet:
+  // tell the student it's on its way instead of showing nothing.
+  const since = minutesAgoIso(15);
+  const { count: pendingCount } = await supabase
+    .from("purchases")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", session.sub)
+    .eq("payment_status", "pending")
+    .gte("created_at", since);
+  const waiting = (pendingCount ?? 0) > 0;
+
   return (
     <>
       <AppHeader />
@@ -45,7 +61,18 @@ export default async function PurchasesPage() {
             Everything you&apos;ve unlocked, available offline in the viewer.
           </p>
 
-          {list.length === 0 && (
+          {waiting && (
+            <GlassPanel className="mt-6 border-accent-a/40 bg-accent-a/5 p-5">
+              <AutoRefresh />
+              <p className="font-semibold text-ink">Your payment is being confirmed…</p>
+              <p className="mt-1 text-sm text-ink-dim">
+                If you have approved the payment on your phone, your paper will appear here in a
+                few seconds. This page updates by itself.
+              </p>
+            </GlassPanel>
+          )}
+
+          {list.length === 0 && !waiting && (
             <GlassPanel className="mt-6 p-6 text-center">
               <p className="text-ink-dim">You haven&apos;t bought anything yet.</p>
               <Link href="/level" className="mt-4 inline-block">

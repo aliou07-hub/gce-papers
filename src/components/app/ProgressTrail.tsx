@@ -16,7 +16,7 @@ export function ProgressTrail({ current }: { current: 0 | 1 | 2 }) {
         return (
           <div
             key={step}
-            className={`flex-1 px-3 py-2.5 text-center ${i > 0 ? "border-l border-white/10" : ""} ${
+            className={`flex-1 px-3 py-2.5 text-center ${i > 0 ? "border-l border-glass-border" : ""} ${
               active
                 ? "rounded-[inherit] bg-accent-a text-white font-semibold shadow-[0_4px_16px_-4px_var(--color-accent-a)]"
                 : done
