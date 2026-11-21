@@ -31,7 +31,12 @@ export class KpayProvider implements PaymentProvider {
       signal: AbortSignal.timeout(15_000),
     });
 
-    if (!res.ok) throw new Error(`KPAY init failed with status ${res.status}`);
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      // Visible in the Vercel logs so a refused payment can be diagnosed.
+      console.error(`[kpay] init refused (HTTP ${res.status}): ${detail.slice(0, 500)}`);
+      throw new Error(`KPAY init failed with status ${res.status}`);
+    }
 
     const data = (await res.json()) as { id?: string; gatewayUrl?: string };
     if (!data.id || !data.gatewayUrl) throw new Error("KPAY init returned no payment page");
