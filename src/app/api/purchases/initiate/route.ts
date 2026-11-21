@@ -1,18 +1,9 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { getStudentSession } from "@/lib/auth/session";
 import { checkoutQuerySchema, resolveCheckoutQuote } from "@/lib/checkoutQuote";
-import { normalizePhone } from "@/lib/auth/phone";
 import { getPaymentProvider } from "@/lib/payment";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rateLimit";
-
-const bodySchema = checkoutQuerySchema.and(
-  z.object({
-    momoNumber: z.string().min(1),
-    operator: z.enum(["MTN", "ORANGE"]),
-  })
-);
 
 export async function POST(request: Request) {
   const session = await getStudentSession();
@@ -23,14 +14,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Too many attempts. Wait a moment and try again." }, { status: 429 });
   }
 
-  const parsed = bodySchema.safeParse(await request.json().catch(() => null));
+  const parsed = checkoutQuerySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
-  }
-
-  const momoNumber = normalizePhone(parsed.data.momoNumber);
-  if (!momoNumber) {
-    return NextResponse.json({ error: "Enter a valid Mobile Money number" }, { status: 400 });
   }
 
   const quote = await resolveCheckoutQuote(parsed.data);
@@ -51,7 +37,8 @@ export async function POST(request: Request) {
       subject: parsed.data.type === "subject" ? parsed.data.subject : null,
       amount_paid_fcfa: quote.amountFcfa,
       payment_status: "pending",
-      momo_number: momoNumber,
+      // The customer enters their Mobile Money number on the payment page, not here.
+      momo_number: "gateway",
     })
     .select("id")
     .single();
@@ -60,13 +47,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Could not start purchase" }, { status: 500 });
   }
 
-  const provider = getPaymentProvider();
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin).replace(/\/$/, "");
   try {
+    const provider = getPaymentProvider();
     const result = await provider.initiate({
       amountFcfa: quote.amountFcfa,
-      momoNumber,
-      operator: parsed.data.operator,
       purchaseId: purchase.id,
+      siteUrl,
     });
 
     await supabase
@@ -81,6 +68,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       purchaseId: purchase.id,
       confirmed: result.confirmed,
+      redirectUrl: result.redirectUrl ?? null,
       label: quote.label,
       amountFcfa: quote.amountFcfa,
     });

@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GlassPanel } from "@/components/ui/GlassPanel";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { CheckBadgeIcon, TONES, IconBadge } from "@/components/ui/IconBadge";
 
 type Step = "loading" | "form" | "paying" | "done" | "error";
-type Operator = "MTN" | "ORANGE";
 
 export function CheckoutFlow() {
   const router = useRouter();
@@ -17,8 +15,6 @@ export function CheckoutFlow() {
 
   const [step, setStep] = useState<Step>("loading");
   const [quote, setQuote] = useState<{ label: string; amountFcfa: number } | null>(null);
-  const [momoNumber, setMomoNumber] = useState("");
-  const [operator, setOperator] = useState<Operator>("MTN");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,10 +41,14 @@ export function CheckoutFlow() {
       const res = await fetch("/api/purchases/initiate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...query, momoNumber, operator }),
+        body: JSON.stringify(query),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Payment failed");
+      if (data.redirectUrl) {
+        window.location.assign(data.redirectUrl);
+        return;
+      }
       setStep("done");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Payment failed");
@@ -99,40 +99,9 @@ export function CheckoutFlow() {
       </div>
 
       <form onSubmit={confirmPurchase} className="mt-5 flex flex-col gap-4">
-        <div>
-          <span className="mb-1.5 block text-sm text-ink-dim">Mobile Money network</span>
-          <div className="grid grid-cols-2 gap-2">
-            {(["MTN", "ORANGE"] as const).map((op) => (
-              <button
-                type="button"
-                key={op}
-                onClick={() => setOperator(op)}
-                className={`rounded-control border px-4 py-2.5 text-sm font-medium transition-colors ${
-                  operator === op
-                    ? "border-accent-a bg-accent-a/20 text-ink"
-                    : "border-white/12 bg-white/5 text-ink-dim"
-                }`}
-              >
-                {op === "MTN" ? "MTN MoMo" : "Orange Money"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="momo" className="mb-1.5 block text-sm text-ink-dim">
-            Mobile Money number
-          </label>
-          <Input
-            id="momo"
-            type="tel"
-            inputMode="tel"
-            placeholder="6XX XXX XXX"
-            value={momoNumber}
-            onChange={(e) => setMomoNumber(e.target.value)}
-            required
-          />
-        </div>
+        <p className="text-sm text-ink-dim">
+          You will choose MTN MoMo or Orange Money and enter your number on the secure payment page.
+        </p>
 
         {error && (
           <p role="alert" className="rounded-control bg-danger/15 px-3 py-2 text-sm text-danger">
@@ -141,7 +110,7 @@ export function CheckoutFlow() {
         )}
 
         <Button type="submit" disabled={step === "paying"} className="mt-1 w-full">
-          {step === "paying" ? "Confirming payment…" : `Pay ${quote?.amountFcfa.toLocaleString()} FCFA`}
+          {step === "paying" ? "Opening payment page…" : `Pay ${quote?.amountFcfa.toLocaleString()} FCFA`}
         </Button>
       </form>
     </GlassPanel>
