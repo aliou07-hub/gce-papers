@@ -5,6 +5,7 @@ import { GlassPanel } from "@/components/ui/GlassPanel";
 import { Button } from "@/components/ui/Button";
 import { getStudentSession } from "@/lib/auth/session";
 import { supabaseAdmin } from "@/lib/supabase/server";
+import { reconcileUserPurchases } from "@/lib/payment/reconcile";
 import { splitPaperLabel } from "@/lib/paperLabel";
 import type { DbDocument, DbPurchase, GceLevel } from "@/lib/types";
 
@@ -19,6 +20,10 @@ const LEVEL_LABEL: Record<GceLevel, string> = { O_LEVEL: "O Level", A_LEVEL: "A 
 export default async function PurchasesPage() {
   const session = await getStudentSession();
   if (!session) return null; // middleware guards this route
+
+  // Safety net: any recent payment still waiting is checked with KPAY right
+  // now, so a paid purchase always shows up here even if the webhook is late.
+  await reconcileUserPurchases(session.sub);
 
   const supabase = supabaseAdmin();
   const { data: purchases } = await supabase

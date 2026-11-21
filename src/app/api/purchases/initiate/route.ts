@@ -73,13 +73,19 @@ export async function POST(request: Request) {
       description: `GCE Papers - ${quote.label}`,
     });
 
+    // Only store the reference: never overwrite a status the KPAY webhook may
+    // already have set (it can arrive before this line runs).
     await supabase
       .from("purchases")
-      .update({
-        payment_status: result.confirmed ? "confirmed" : "pending",
-        payment_reference: result.reference,
-        confirmed_at: result.confirmed ? new Date().toISOString() : null,
-      })
+      .update(
+        result.confirmed
+          ? {
+              payment_status: "confirmed",
+              payment_reference: result.reference,
+              confirmed_at: new Date().toISOString(),
+            }
+          : { payment_reference: result.reference }
+      )
       .eq("id", purchase.id);
 
     return NextResponse.json({
@@ -89,7 +95,11 @@ export async function POST(request: Request) {
       amountFcfa: quote.amountFcfa,
     });
   } catch {
-    await supabase.from("purchases").update({ payment_status: "failed" }).eq("id", purchase.id);
+    await supabase
+      .from("purchases")
+      .update({ payment_status: "failed" })
+      .eq("id", purchase.id)
+      .eq("payment_status", "pending");
     return NextResponse.json(
       {
         error:

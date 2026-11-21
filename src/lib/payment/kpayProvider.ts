@@ -51,7 +51,8 @@ export class KpayProvider implements PaymentProvider {
       throw new Error(`KPAY init failed with status ${res.status}`);
     }
 
-    const data = (await res.json()) as { id?: string; reference?: string };
+    const body = (await res.json()) as { id?: string; reference?: string; data?: { id?: string; reference?: string } };
+    const data = body.data ?? body;
     const reference = data.id ?? data.reference;
     if (!reference) throw new Error("KPAY init returned no payment id");
 
@@ -64,7 +65,9 @@ export class KpayProvider implements PaymentProvider {
       { headers: this.headers(), cache: "no-store", signal: AbortSignal.timeout(10_000) }
     );
     if (!res.ok) return null;
-    const data = (await res.json()) as { status?: string; amount?: number | string; externalId?: string };
+    type Payment = { status?: string; amount?: number | string; externalId?: string };
+    const body = (await res.json()) as Payment & { data?: Payment };
+    const data = body.data ?? body;
     const raw = String(data.status ?? "").toUpperCase();
     const status =
       raw === "COMPLETED" ? "COMPLETED" : raw === "FAILED" || raw === "CANCELLED" ? "FAILED" : "PENDING";

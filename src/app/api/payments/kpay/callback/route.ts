@@ -55,11 +55,13 @@ export async function POST(request: Request) {
       console.error("KPAY amount below purchase price", purchase.id, payload.amount);
       return NextResponse.json({ received: true });
     }
+    // A signed COMPLETED event always delivers, even if our side had marked
+    // the purchase failed (e.g. KPAY answered the init call too slowly).
     await supabase
       .from("purchases")
       .update({ payment_status: "confirmed", confirmed_at: new Date().toISOString() })
       .eq("id", purchase.id)
-      .eq("payment_status", "pending");
+      .in("payment_status", ["pending", "failed"]);
   } else if (payload.event === "payment.failed" || payload.event === "payment.cancelled") {
     await supabase
       .from("purchases")

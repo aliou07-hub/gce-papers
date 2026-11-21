@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { CheckBadgeIcon, TONES, IconBadge } from "@/components/ui/IconBadge";
 
-type Step = "loading" | "form" | "sending" | "waiting" | "done" | "error";
+type Step = "loading" | "form" | "confirm" | "sending" | "waiting" | "done" | "error";
 type Operator = "MTN" | "ORANGE";
 
 const POLL_EVERY_MS = 4000;
@@ -77,8 +77,21 @@ export function CheckoutFlow() {
     };
   }, [step, purchaseId]);
 
-  async function confirmPurchase(e: React.FormEvent) {
-    e.preventDefault();
+  /** First tap: only checks the number and shows the summary. Nothing is sent yet. */
+  function reviewPayment() {
+    setError(null);
+    const digits = momoNumber.replace(/\D/g, "").replace(/^237/, "");
+    if (!/^6\d{8}$/.test(digits)) {
+      setError("Enter your 9-digit Mobile Money number, e.g. 6XX XXX XXX.");
+      return;
+    }
+    setMomoNumber(digits);
+    setStep("confirm");
+  }
+
+  /** Second tap, on "Yes, send the request": the only place a payment is started. */
+  async function sendPaymentRequest() {
+    if (step !== "confirm") return;
     setError(null);
     setStep("sending");
     try {
@@ -164,7 +177,48 @@ export function CheckoutFlow() {
         </p>
       </div>
 
-      <form onSubmit={confirmPurchase} className="mt-5 flex flex-col gap-5">
+      {(step === "confirm" || step === "sending") ? (
+        <div className="mt-5 flex flex-col gap-4">
+          <div className="rounded-control border-2 border-accent-b/30 bg-accent-b/5 p-4">
+            <p className="text-sm font-semibold text-ink">Please check before paying:</p>
+            <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[15px]">
+              <dt className="text-ink-dim">Network</dt>
+              <dd className="font-semibold text-ink">
+                {operator === "MTN" ? "MTN MoMo" : "Orange Money"}
+              </dd>
+              <dt className="text-ink-dim">Number</dt>
+              <dd className="font-semibold tracking-wide text-ink">{momoNumber}</dd>
+              <dt className="text-ink-dim">Amount</dt>
+              <dd className="font-semibold text-ink">{quote?.amountFcfa.toLocaleString()} FCFA</dd>
+            </dl>
+          </div>
+
+          {error && (
+            <p role="alert" className="rounded-control bg-danger/10 px-3 py-2 text-sm text-danger">
+              {error}
+            </p>
+          )}
+
+          <Button
+            type="button"
+            onClick={sendPaymentRequest}
+            disabled={step === "sending"}
+            className="w-full py-3.5 text-base"
+          >
+            {step === "sending" ? "Sending request to your phone…" : "Yes, send the request"}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setStep("form")}
+            disabled={step === "sending"}
+            className="w-full"
+          >
+            Change number
+          </Button>
+        </div>
+      ) : (
+      <div className="mt-5 flex flex-col gap-5">
         <div>
           <span className="mb-2 block text-sm font-medium text-ink">1. Choose your network</span>
           <div className="grid grid-cols-2 gap-2">
@@ -196,11 +250,16 @@ export function CheckoutFlow() {
             id="momo"
             type="tel"
             inputMode="numeric"
-            autoComplete="tel"
+            name="momo-entry"
+            autoComplete="off"
+            maxLength={16}
             placeholder="6XX XXX XXX"
             value={momoNumber}
             onChange={(e) => setMomoNumber(e.target.value)}
-            required
+            onKeyDown={(e) => {
+              // The keyboard's Enter/Go key never starts a payment.
+              if (e.key === "Enter") e.preventDefault();
+            }}
             className="text-lg tracking-wide"
           />
         </div>
@@ -211,15 +270,14 @@ export function CheckoutFlow() {
           </p>
         )}
 
-        <Button type="submit" disabled={step === "sending"} className="w-full py-3.5 text-base">
-          {step === "sending"
-            ? "Sending request to your phone…"
-            : `Pay ${quote?.amountFcfa.toLocaleString()} FCFA`}
+        <Button type="button" onClick={reviewPayment} className="w-full py-3.5 text-base">
+          Continue
         </Button>
         <p className="-mt-2 text-center text-xs text-ink-faint">
-          You will confirm with your PIN code on your phone.
+          You will check your details, then confirm with your PIN code on your phone.
         </p>
-      </form>
+      </div>
+      )}
     </GlassPanel>
   );
 }
