@@ -3,7 +3,12 @@ import { KpayProvider } from "./kpayProvider";
 import { MockPaymentProvider } from "./mockProvider";
 import type { PaymentProvider } from "./types";
 
-export type { InitiatePaymentInput, InitiatePaymentResult, PaymentProvider } from "./types";
+export type {
+  InitiatePaymentInput,
+  InitiatePaymentResult,
+  PaymentProvider,
+  MomoOperator,
+} from "./types";
 
 /**
  * Single point of truth for which payment provider is active. KPAY is used as
