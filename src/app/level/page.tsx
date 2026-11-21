@@ -23,7 +23,7 @@ export default function LevelPage() {
                   <BookIcon />
                 </IconBadge>
                 <div>
-                  <p className="text-xl font-bold text-accent-o">O Level</p>
+                  <p className="text-xl font-bold text-accent-b">O Level</p>
                   <p className="mt-1 text-sm text-ink-dim">Ordinary Level, first cycle</p>
                 </div>
               </TiltCard>

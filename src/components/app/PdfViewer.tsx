@@ -254,7 +254,7 @@ export function PdfViewer({ documentId }: { documentId: string }) {
             onClick={() => setPageNum((p) => Math.max(1, p - 1))}
             disabled={pageNum <= 1}
             className="btn-glass flex items-center gap-1.5 rounded-control px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-30"
-            style={{ "--btn-tint": "var(--color-accent-o)" } as React.CSSProperties}
+            style={{ "--btn-tint": "var(--color-accent-b)" } as React.CSSProperties}
           >
             ← Previous
           </button>
@@ -265,7 +265,7 @@ export function PdfViewer({ documentId }: { documentId: string }) {
             onClick={() => setPageNum((p) => Math.min(numPages, p + 1))}
             disabled={pageNum >= numPages}
             className="btn-glass flex items-center gap-1.5 rounded-control px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-30"
-            style={{ "--btn-tint": "var(--color-accent-o)" } as React.CSSProperties}
+            style={{ "--btn-tint": "var(--color-accent-b)" } as React.CSSProperties}
           >
             Next →
           </button>

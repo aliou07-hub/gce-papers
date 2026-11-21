@@ -2,13 +2,13 @@ import type { GceLevel } from "./types";
 
 /** O-Level is flat per paper regardless of subject or paper number. */
 const O_LEVEL_QUESTIONS_PRICE = 150;
-const O_LEVEL_SCHEME_PRICE = 100;
+const O_LEVEL_SCHEME_PRICE = 200;
 
 /** A-Level: Paper 1 costs more than the other papers; marking schemes are
  * a flat price regardless of paper number. */
 const A_LEVEL_PAPER_ONE_QUESTIONS_PRICE = 250;
 const A_LEVEL_OTHER_PAPER_QUESTIONS_PRICE = 200;
-const A_LEVEL_SCHEME_PRICE = 400;
+const A_LEVEL_SCHEME_PRICE = 200;
 
 /** Flat discount applied to a full-year bundle (questions + marking scheme for every paper). */
 export const BUNDLE_DISCOUNT_FCFA = 400;

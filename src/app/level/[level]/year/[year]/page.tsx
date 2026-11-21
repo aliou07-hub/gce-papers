@@ -80,7 +80,7 @@ export default async function SubjectsPage({
                 href={`/checkout?type=bundle&level=${level}&year=${year}`}
                 className="shrink-0"
               >
-                <Button variant="primary" tint="var(--color-mint)">
+                <Button variant="primary">
                   {bundle.price.toLocaleString()} FCFA
                 </Button>
               </Link>
@@ -185,7 +185,7 @@ export default async function SubjectsPage({
                                   href={`/checkout?type=subject&level=${level}&year=${year}&subject=${encodeURIComponent(
                                     rawSubject
                                   )}&option=both`}
-                                  className="flex-1"
+                                  className="basis-full"
                                 >
                                   <Button
                                     variant={level === "O_LEVEL" ? "o-level" : "a-level"}
